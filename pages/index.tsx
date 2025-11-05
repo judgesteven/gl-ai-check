@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 
+interface CheckedQuery {
+  query: string;
+  found: boolean;
+}
+
 interface Status {
-  query?: string;
   found?: boolean;
+  foundQuery?: string | null;
+  checked?: CheckedQuery[];
   timestamp?: string;
   error?: string;
   details?: string;
@@ -30,9 +36,10 @@ export default function Home() {
   return (
     <main style={{
       fontFamily: "system-ui, sans-serif",
-      maxWidth: 600, margin: "4em auto", textAlign: "center", padding: "0 1em"
+      maxWidth: 700, margin: "4em auto", textAlign: "center", padding: "0 1em"
     }}>
       <h1>GameLayer LLM Visibility Monitor</h1>
+
       {status ? (
         <>
           {status.error ? (
@@ -42,20 +49,33 @@ export default function Home() {
             </div>
           ) : (
             <>
-              <p><strong>Query:</strong> {status.query}</p>
+              <p><strong>Status:</strong></p>
               <p style={{ fontSize: "2rem" }}>
                 {status.found ? "✅ Found in results" : "❌ Not yet visible"}
               </p>
+              {status.foundQuery && (
+                <p><em>Matched Query:</em> "{status.foundQuery}"</p>
+              )}
               <p><small>Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}</small></p>
+
+              <h2 style={{ marginTop: "2em" }}>Queries Checked</h2>
+              <ul style={{ textAlign: "left", display: "inline-block" }}>
+                {status.checked?.map((q, i) => (
+                  <li key={i}>
+                    {q.found ? "✅" : "❌"} {q.query}
+                  </li>
+                ))}
+              </ul>
             </>
           )}
         </>
       ) : <p>Loading...</p>}
+
       <button
         onClick={runCheck}
         disabled={loading}
         style={{
-          marginTop: "1em", padding: "0.5em 1em", borderRadius: 6,
+          marginTop: "1.5em", padding: "0.6em 1.2em", borderRadius: 6,
           border: "none", background: loading ? "#9ca3af" : "#2563eb", 
           color: "white", cursor: loading ? "not-allowed" : "pointer",
           fontSize: "1rem"
