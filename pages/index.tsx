@@ -22,10 +22,15 @@ export default function Home() {
     setLoading(true);
     try {
       const res = await fetch("/api/check");
-      const data = await res.json();
-      setStatus(data);
-    } catch (e) {
-      setStatus({ error: "Request failed" });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        setStatus({ error: errorData.error || "Request failed", details: errorData.details });
+      } else {
+        const data = await res.json();
+        setStatus(data);
+      }
+    } catch (e: any) {
+      setStatus({ error: "Request failed", details: e.message || "Network error" });
     } finally {
       setLoading(false);
     }
@@ -35,54 +40,200 @@ export default function Home() {
 
   return (
     <main style={{
-      fontFamily: "system-ui, sans-serif",
-      maxWidth: 700, margin: "4em auto", textAlign: "center", padding: "0 1em"
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      maxWidth: 800,
+      margin: "0 auto",
+      padding: "2em 1em",
+      minHeight: "100vh",
+      backgroundColor: "#f9fafb"
     }}>
-      <h1>GameLayer LLM Visibility Monitor</h1>
+      <div style={{
+        backgroundColor: "white",
+        borderRadius: "12px",
+        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+        padding: "2.5em",
+        marginBottom: "2em"
+      }}>
+        <h1 style={{
+          fontSize: "2rem",
+          fontWeight: "700",
+          color: "#111827",
+          margin: "0 0 0.5em 0",
+          textAlign: "center"
+        }}>
+          GameLayer LLM Visibility Monitor
+        </h1>
 
-      {status ? (
-        <>
-          {status.error ? (
-            <div style={{ color: "#dc2626", padding: "1em" }}>
-              <p><strong>Error:</strong> {status.error}</p>
-              {status.details && <p><small>{status.details}</small></p>}
-            </div>
-          ) : (
-            <>
-              <p><strong>Status:</strong></p>
-              <p style={{ fontSize: "2rem" }}>
-                {status.found ? "✅ Found in results" : "❌ Not yet visible"}
-              </p>
-              {status.foundQuery && (
-                <p><em>Matched Query:</em> "{status.foundQuery}"</p>
-              )}
-              <p><small>Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}</small></p>
+        {status ? (
+          <>
+            {status.error ? (
+              <div style={{
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "8px",
+                padding: "1.5em",
+                marginTop: "1.5em"
+              }}>
+                <p style={{ color: "#dc2626", margin: "0 0 0.5em 0", fontWeight: "600" }}>
+                  <strong>Error:</strong> {status.error}
+                </p>
+                {status.details && (
+                  <p style={{ color: "#991b1b", margin: 0, fontSize: "0.875rem" }}>
+                    {status.details}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <>
+                <div style={{
+                  backgroundColor: status.found ? "#f0fdf4" : "#fef2f2",
+                  border: `2px solid ${status.found ? "#86efac" : "#fca5a5"}`,
+                  borderRadius: "8px",
+                  padding: "1.5em",
+                  marginTop: "1.5em",
+                  marginBottom: "1.5em"
+                }}>
+                  <p style={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    color: "#6b7280",
+                    margin: "0 0 0.5em 0",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}>
+                    Status
+                  </p>
+                  <p style={{
+                    fontSize: "2.5rem",
+                    fontWeight: "700",
+                    margin: "0 0 0.5em 0",
+                    color: status.found ? "#16a34a" : "#dc2626"
+                  }}>
+                    {status.found ? "✅ Found in results" : "❌ Not yet visible"}
+                  </p>
+                  {status.foundQuery && (
+                    <p style={{
+                      fontSize: "1rem",
+                      color: "#374151",
+                      margin: "0.5em 0",
+                      fontStyle: "italic"
+                    }}>
+                      <strong>Matched Query:</strong> "{status.foundQuery}"
+                    </p>
+                  )}
+                  <p style={{
+                    fontSize: "0.875rem",
+                    color: "#6b7280",
+                    margin: "1em 0 0 0"
+                  }}>
+                    Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}
+                  </p>
+                </div>
 
-              <h2 style={{ marginTop: "2em" }}>Queries Checked</h2>
-              <ul style={{ textAlign: "left", display: "inline-block" }}>
-                {status.checked?.map((q, i) => (
-                  <li key={i}>
-                    {q.found ? "✅" : "❌"} {q.query}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </>
-      ) : <p>Loading...</p>}
+                <div style={{
+                  marginTop: "2em",
+                  paddingTop: "2em",
+                  borderTop: "1px solid #e5e7eb"
+                }}>
+                  <h2 style={{
+                    fontSize: "1.25rem",
+                    fontWeight: "600",
+                    color: "#111827",
+                    margin: "0 0 1em 0",
+                    textAlign: "center"
+                  }}>
+                    Queries Checked
+                  </h2>
+                  <ul style={{
+                    textAlign: "left",
+                    display: "inline-block",
+                    listStyle: "none",
+                    padding: 0,
+                    margin: 0,
+                    width: "100%",
+                    maxWidth: "600px"
+                  }}>
+                    {status.checked?.map((q, i) => (
+                      <li key={i} style={{
+                        padding: "0.75em 1em",
+                        margin: "0.5em 0",
+                        backgroundColor: q.found ? "#f0fdf4" : "#f9fafb",
+                        borderRadius: "6px",
+                        border: `1px solid ${q.found ? "#86efac" : "#e5e7eb"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75em"
+                      }}>
+                        <span style={{
+                          fontSize: "1.25rem",
+                          flexShrink: 0
+                        }}>
+                          {q.found ? "✅" : "❌"}
+                        </span>
+                        <span style={{
+                          color: "#374151",
+                          fontSize: "0.9375rem"
+                        }}>
+                          {q.query}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div style={{
+            textAlign: "center",
+            padding: "3em 0",
+            color: "#6b7280"
+          }}>
+            <p style={{ fontSize: "1.125rem" }}>Loading...</p>
+          </div>
+        )}
+      </div>
 
-      <button
-        onClick={runCheck}
-        disabled={loading}
-        style={{
-          marginTop: "1.5em", padding: "0.6em 1.2em", borderRadius: 6,
-          border: "none", background: loading ? "#9ca3af" : "#2563eb", 
-          color: "white", cursor: loading ? "not-allowed" : "pointer",
-          fontSize: "1rem"
-        }}
-      >
-        {loading ? "Checking..." : "Run Check Now"}
-      </button>
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        width: "100%"
+      }}>
+        <button
+          onClick={runCheck}
+          disabled={loading}
+          style={{
+            padding: "0.875em 2em",
+            borderRadius: "8px",
+            border: "none",
+            background: loading ? "#9ca3af" : "#2563eb",
+            color: "white",
+            cursor: loading ? "not-allowed" : "pointer",
+            fontSize: "1rem",
+            fontWeight: "600",
+            boxShadow: loading ? "none" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+            transition: "all 0.2s ease",
+            width: "100%",
+            maxWidth: "300px"
+          }}
+          onMouseEnter={(e) => {
+            if (!loading) {
+              e.currentTarget.style.background = "#1d4ed8";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!loading) {
+              e.currentTarget.style.background = "#2563eb";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+            }
+          }}
+        >
+          {loading ? "Checking..." : "Run Check Now"}
+        </button>
+      </div>
     </main>
   );
 }
