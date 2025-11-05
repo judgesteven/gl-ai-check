@@ -17,13 +17,17 @@ export default async function handler(
     }
 
     const queries = [
+      "gamification platform",
       "gamification API",
       "gamification API platform",
       "gamification tools for developers",
-      "gamification as a service",
-      "missions and achievements API",
       "add gamification to app",
-      "loyalty gamification platform"
+      "missions and achievements API",
+      "user engagement platform",
+      "user engagement API",
+      "loyalty gamification platform",
+      "customer retention gamification",
+      "gamification for user engagement"
     ];
 
     let found = false;
