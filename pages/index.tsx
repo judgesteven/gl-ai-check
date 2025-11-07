@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 interface CheckedQuery {
   query: string;
-  rank: number | null;
+  found: boolean;
 }
 
 interface Status {
@@ -101,7 +101,7 @@ export default function Home() {
                     textTransform: "uppercase",
                     letterSpacing: "0.05em"
                   }}>
-                    LLM Visibility Status
+                    Status
                   </p>
                   <p style={{
                     fontSize: "2.5rem",
@@ -142,84 +142,43 @@ export default function Home() {
                     margin: "0 0 1em 0",
                     textAlign: "center"
                   }}>
-                    Search Ranking Details
+                    Queries Checked
                   </h2>
-                </div>
-
-                <div style={{
-                  overflowX: "auto",
-                  marginTop: "1em"
-                }}>
-                  <table style={{
+                  <ul style={{
+                    textAlign: "left",
+                    display: "inline-block",
+                    listStyle: "none",
+                    padding: 0,
+                    margin: 0,
                     width: "100%",
-                    borderCollapse: "collapse",
-                    margin: "0 auto",
-                    maxWidth: "700px"
+                    maxWidth: "600px"
                   }}>
-                    <thead>
-                      <tr>
-                        <th style={{
-                          borderBottom: "2px solid #e5e7eb",
-                          padding: "0.75em 1em",
-                          textAlign: "left",
-                          fontSize: "0.875rem",
-                          fontWeight: "600",
-                          color: "#6b7280",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em"
+                    {status.checked?.map((q, i) => (
+                      <li key={i} style={{
+                        padding: "0.75em 1em",
+                        margin: "0.5em 0",
+                        backgroundColor: q.found ? "#f0fdf4" : "#f9fafb",
+                        borderRadius: "6px",
+                        border: `1px solid ${q.found ? "#86efac" : "#e5e7eb"}`,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75em"
+                      }}>
+                        <span style={{
+                          fontSize: "1.25rem",
+                          flexShrink: 0
                         }}>
-                          Query
-                        </th>
-                        <th style={{
-                          borderBottom: "2px solid #e5e7eb",
-                          padding: "0.75em 1em",
-                          textAlign: "center",
-                          fontSize: "0.875rem",
-                          fontWeight: "600",
-                          color: "#6b7280",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em"
+                          {q.found ? "✅" : "❌"}
+                        </span>
+                        <span style={{
+                          color: "#374151",
+                          fontSize: "0.9375rem"
                         }}>
-                          Rank
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {status.checked?.map((q, i) => {
-                        const hasRank = q.rank !== null;
-                        return (
-                          <tr key={i} style={{
-                            backgroundColor: hasRank ? (q.rank! <= 10 ? "#f0fdf4" : q.rank! <= 50 ? "#fef3c7" : "#fef2f2") : "#f9fafb",
-                            transition: "background-color 0.2s"
-                          }}>
-                            <td style={{
-                              borderBottom: "1px solid #e5e7eb",
-                              padding: "0.875em 1em",
-                              textAlign: "left",
-                              color: "#374151",
-                              fontSize: "0.9375rem"
-                            }}>
-                              {q.query}
-                            </td>
-                            <td style={{
-                              borderBottom: "1px solid #e5e7eb",
-                              padding: "0.875em 1em",
-                              textAlign: "center",
-                              fontWeight: "600",
-                              color: hasRank 
-                                ? (q.rank! <= 10 ? "#16a34a" : q.rank! <= 50 ? "#d97706" : "#dc2626")
-                                : "#6b7280",
-                              fontSize: "0.9375rem"
-                            }}>
-                              {q.rank
-                                ? `#${q.rank}`
-                                : "❌ Not in Top 100"}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                          {q.query}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </>
             )}
