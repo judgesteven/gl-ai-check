@@ -6,6 +6,8 @@ interface CheckedQuery {
 }
 
 interface Status {
+  found?: boolean;
+  foundQuery?: string | null;
   checked?: CheckedQuery[];
   timestamp?: string;
   error?: string;
@@ -59,7 +61,7 @@ export default function Home() {
           margin: "0 0 0.5em 0",
           textAlign: "center"
         }}>
-          GameLayer Search Visibility Monitor
+          GameLayer LLM Visibility Monitor
         </h1>
 
         {status ? (
@@ -83,14 +85,66 @@ export default function Home() {
               </div>
             ) : (
               <>
-                <p style={{
-                  fontSize: "0.875rem",
-                  color: "#6b7280",
-                  margin: "1em 0 2em 0",
-                  textAlign: "center"
+                <div style={{
+                  backgroundColor: status.found ? "#f0fdf4" : "#fef2f2",
+                  border: `2px solid ${status.found ? "#86efac" : "#fca5a5"}`,
+                  borderRadius: "8px",
+                  padding: "1.5em",
+                  marginTop: "1.5em",
+                  marginBottom: "1.5em"
                 }}>
-                  Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}
-                </p>
+                  <p style={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    color: "#6b7280",
+                    margin: "0 0 0.5em 0",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}>
+                    LLM Visibility Status
+                  </p>
+                  <p style={{
+                    fontSize: "2.5rem",
+                    fontWeight: "700",
+                    margin: "0 0 0.5em 0",
+                    color: status.found ? "#16a34a" : "#dc2626"
+                  }}>
+                    {status.found ? "✅ Found in results" : "❌ Not yet visible"}
+                  </p>
+                  {status.foundQuery && (
+                    <p style={{
+                      fontSize: "1rem",
+                      color: "#374151",
+                      margin: "0.5em 0",
+                      fontStyle: "italic"
+                    }}>
+                      <strong>Matched Query:</strong> "{status.foundQuery}"
+                    </p>
+                  )}
+                  <p style={{
+                    fontSize: "0.875rem",
+                    color: "#6b7280",
+                    margin: "1em 0 0 0"
+                  }}>
+                    Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}
+                  </p>
+                </div>
+
+                <div style={{
+                  marginTop: "2em",
+                  paddingTop: "2em",
+                  borderTop: "1px solid #e5e7eb"
+                }}>
+                  <h2 style={{
+                    fontSize: "1.25rem",
+                    fontWeight: "600",
+                    color: "#111827",
+                    margin: "0 0 1em 0",
+                    textAlign: "center"
+                  }}>
+                    Search Ranking Details
+                  </h2>
+                </div>
 
                 <div style={{
                   overflowX: "auto",

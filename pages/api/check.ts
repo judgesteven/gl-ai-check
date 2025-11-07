@@ -31,6 +31,8 @@ export default async function handler(
     ];
 
     const checked: Array<{ query: string; rank: number | null }> = [];
+    let found = false;
+    let foundQuery: string | null = null;
 
     for (const q of queries) {
       const url = `https://serpapi.com/search.json?q=${encodeURIComponent(q)}&engine=google&num=100&api_key=${apiKey}`;
@@ -42,6 +44,10 @@ export default async function handler(
       for (const item of results) {
         if ((item.link || "").includes("gamelayer.io")) {
           rank = item.position || null;
+          if (!found) {
+            found = true;
+            foundQuery = q;
+          }
           break;
         }
       }
@@ -49,7 +55,7 @@ export default async function handler(
     }
 
     const timestamp = new Date().toISOString();
-    const payload = { timestamp, checked };
+    const payload = { found, foundQuery, timestamp, checked };
 
     // write to /tmp (ephemeral on Vercel, fine for demo)
     try {
