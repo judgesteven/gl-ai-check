@@ -30,26 +30,26 @@ export default async function handler(
       "gamification for user engagement"
     ];
 
-    let found = false;
-    let foundQuery: string | null = null;
-    const checked: Array<{ query: string; found: boolean }> = [];
+    const checked: Array<{ query: string; rank: number | null }> = [];
 
     for (const q of queries) {
-      const url = `https://serpapi.com/search.json?q=${encodeURIComponent(q)}&engine=google&api_key=${apiKey}`;
+      const url = `https://serpapi.com/search.json?q=${encodeURIComponent(q)}&engine=google&num=100&api_key=${apiKey}`;
       const r = await fetch(url);
       const data = await r.json();
       const results = data.organic_results || [];
-      const hit = results.some((r: any) => (r.link || "").includes("gamelayer.io"));
-      checked.push({ query: q, found: hit });
-      if (hit) {
-        found = true;
-        foundQuery = q;
-        break;
+
+      let rank: number | null = null;
+      for (const item of results) {
+        if ((item.link || "").includes("gamelayer.io")) {
+          rank = item.position || null;
+          break;
+        }
       }
+      checked.push({ query: q, rank });
     }
 
     const timestamp = new Date().toISOString();
-    const payload = { found, foundQuery, checked, timestamp };
+    const payload = { timestamp, checked };
 
     // write to /tmp (ephemeral on Vercel, fine for demo)
     try {

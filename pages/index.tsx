@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 
 interface CheckedQuery {
   query: string;
-  found: boolean;
+  rank: number | null;
 }
 
 interface Status {
-  found?: boolean;
-  foundQuery?: string | null;
   checked?: CheckedQuery[];
   timestamp?: string;
   error?: string;
@@ -61,7 +59,7 @@ export default function Home() {
           margin: "0 0 0.5em 0",
           textAlign: "center"
         }}>
-          GameLayer LLM Visibility Monitor
+          GameLayer Search Visibility Monitor
         </h1>
 
         {status ? (
@@ -85,100 +83,89 @@ export default function Home() {
               </div>
             ) : (
               <>
-                <div style={{
-                  backgroundColor: status.found ? "#f0fdf4" : "#fef2f2",
-                  border: `2px solid ${status.found ? "#86efac" : "#fca5a5"}`,
-                  borderRadius: "8px",
-                  padding: "1.5em",
-                  marginTop: "1.5em",
-                  marginBottom: "1.5em"
+                <p style={{
+                  fontSize: "0.875rem",
+                  color: "#6b7280",
+                  margin: "1em 0 2em 0",
+                  textAlign: "center"
                 }}>
-                  <p style={{
-                    fontSize: "0.875rem",
-                    fontWeight: "600",
-                    color: "#6b7280",
-                    margin: "0 0 0.5em 0",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em"
-                  }}>
-                    Status
-                  </p>
-                  <p style={{
-                    fontSize: "2.5rem",
-                    fontWeight: "700",
-                    margin: "0 0 0.5em 0",
-                    color: status.found ? "#16a34a" : "#dc2626"
-                  }}>
-                    {status.found ? "✅ Found in results" : "❌ Not yet visible"}
-                  </p>
-                  {status.foundQuery && (
-                    <p style={{
-                      fontSize: "1rem",
-                      color: "#374151",
-                      margin: "0.5em 0",
-                      fontStyle: "italic"
-                    }}>
-                      <strong>Matched Query:</strong> "{status.foundQuery}"
-                    </p>
-                  )}
-                  <p style={{
-                    fontSize: "0.875rem",
-                    color: "#6b7280",
-                    margin: "1em 0 0 0"
-                  }}>
-                    Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}
-                  </p>
-                </div>
+                  Last checked: {status.timestamp ? new Date(status.timestamp).toLocaleString() : "Unknown"}
+                </p>
 
                 <div style={{
-                  marginTop: "2em",
-                  paddingTop: "2em",
-                  borderTop: "1px solid #e5e7eb"
+                  overflowX: "auto",
+                  marginTop: "1em"
                 }}>
-                  <h2 style={{
-                    fontSize: "1.25rem",
-                    fontWeight: "600",
-                    color: "#111827",
-                    margin: "0 0 1em 0",
-                    textAlign: "center"
-                  }}>
-                    Queries Checked
-                  </h2>
-                  <ul style={{
-                    textAlign: "left",
-                    display: "inline-block",
-                    listStyle: "none",
-                    padding: 0,
-                    margin: 0,
+                  <table style={{
                     width: "100%",
-                    maxWidth: "600px"
+                    borderCollapse: "collapse",
+                    margin: "0 auto",
+                    maxWidth: "700px"
                   }}>
-                    {status.checked?.map((q, i) => (
-                      <li key={i} style={{
-                        padding: "0.75em 1em",
-                        margin: "0.5em 0",
-                        backgroundColor: q.found ? "#f0fdf4" : "#f9fafb",
-                        borderRadius: "6px",
-                        border: `1px solid ${q.found ? "#86efac" : "#e5e7eb"}`,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.75em"
-                      }}>
-                        <span style={{
-                          fontSize: "1.25rem",
-                          flexShrink: 0
+                    <thead>
+                      <tr>
+                        <th style={{
+                          borderBottom: "2px solid #e5e7eb",
+                          padding: "0.75em 1em",
+                          textAlign: "left",
+                          fontSize: "0.875rem",
+                          fontWeight: "600",
+                          color: "#6b7280",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em"
                         }}>
-                          {q.found ? "✅" : "❌"}
-                        </span>
-                        <span style={{
-                          color: "#374151",
-                          fontSize: "0.9375rem"
+                          Query
+                        </th>
+                        <th style={{
+                          borderBottom: "2px solid #e5e7eb",
+                          padding: "0.75em 1em",
+                          textAlign: "center",
+                          fontSize: "0.875rem",
+                          fontWeight: "600",
+                          color: "#6b7280",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em"
                         }}>
-                          {q.query}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                          Rank
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {status.checked?.map((q, i) => {
+                        const hasRank = q.rank !== null;
+                        return (
+                          <tr key={i} style={{
+                            backgroundColor: hasRank ? (q.rank! <= 10 ? "#f0fdf4" : q.rank! <= 50 ? "#fef3c7" : "#fef2f2") : "#f9fafb",
+                            transition: "background-color 0.2s"
+                          }}>
+                            <td style={{
+                              borderBottom: "1px solid #e5e7eb",
+                              padding: "0.875em 1em",
+                              textAlign: "left",
+                              color: "#374151",
+                              fontSize: "0.9375rem"
+                            }}>
+                              {q.query}
+                            </td>
+                            <td style={{
+                              borderBottom: "1px solid #e5e7eb",
+                              padding: "0.875em 1em",
+                              textAlign: "center",
+                              fontWeight: "600",
+                              color: hasRank 
+                                ? (q.rank! <= 10 ? "#16a34a" : q.rank! <= 50 ? "#d97706" : "#dc2626")
+                                : "#6b7280",
+                              fontSize: "0.9375rem"
+                            }}>
+                              {q.rank
+                                ? `#${q.rank}`
+                                : "❌ Not in Top 100"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </>
             )}
